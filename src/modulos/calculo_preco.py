@@ -1,59 +1,109 @@
-# PROJETO-180-GO/src/modulos/calculo_preco.py
-
+# Importa a função obter_fator_climatico
 from src.modulos.obter_fator_climatico import obter_fator_climatico
 
+# Importa a função obter_fator_demanda
+from src.modulos.obter_fator_demanda import obter_fator_demanda
 
-
-def calcular_preco_final(preco_base, condicao_climatica):
+def calcular_preco_final(quilometros, tempo_minutos, condicao_climatica, chamadas_por_minuto):
     """
-    Calcula o preço final de um produto/serviço aplicando o Fator Climático.
+    Calcula o preço final de um produto/serviço aplicando:
+    1. A fórmula de preço base: P(x,t) = 5 + 1.0x + 0.2t
+    2. A SOMA do Fator Climático (FC) e do Fator de Demanda (FD), multiplicada pelo preço base.
 
     Args:
-        preco_base (float): O preço inicial do produto/serviço.
-        condicao_climatica (str): A condição climática atual (ex: "tempo bom", "chuva leve").
+        quilometros (float): Distância em quilômetros (x na fórmula).
+        tempo_minutos (float): Tempo em minutos (t na fórmula).
+        condicao_climatica (str): Condição climática atual (ex: "tempo bom", "chuva leve").
+        chamadas_por_minuto (float): Número de chamadas de demanda por minuto.
 
     Returns:
-        float: O preço final ajustado pelas condições climáticas.
+        float: O preço final ajustado por todos os fatores.
     """
-    if preco_base <= 0:
-        raise ValueError("O preço base deve ser um valor positivo.")
+    
+    # 1. Validação dos parâmetros de entrada
+    if not isinstance(quilometros, (int, float)) or quilometros < 0:
+        print(f"[ALERTA PREÇO] Valor inválido para quilômetros: {quilometros}. Retornando 0.")
+        return 0.0
+    if not isinstance(tempo_minutos, (int, float)) or tempo_minutos < 0:
+        print(f"[ALERTA PREÇO] Valor inválido para tempo em minutos: {tempo_minutos}. Retornando 0.")
+        return 0.0
 
-    # 1. Obter o Fator Climático usando a função que já criamos
+    # 2. Calcular o Preço Base usando a fórmula P(x,t) = 5 + 1.0x + 0.2t
+    # Onde x = quilometros e t = tempo_minutos
+    preco_base = 5 + (1.0 * quilometros) + (0.2 * tempo_minutos)
+    
+    # Adicionando uma validação simples para o preço base calculado
+    if preco_base <= 0:
+        print(f"[ALERTA PREÇO] Preço base calculado é zero ou negativo ({preco_base}). Retornando 0.")
+        return 0.0
+
+    # 3. Obter o Fator Climático (FC)
     fator_climatico = obter_fator_climatico(condicao_climatica)
 
-    # 2. Calcular o preço final
-    preco_final = preco_base * fator_climatico
+    # 4. Obter o Fator de Demanda (FD)
+    fator_demanda = obter_fator_demanda(chamadas_por_minuto)
 
-    return preco_final
+    # 5. Calcular o Preço Final ajustado (AGORA COM SOMA DOS FATORES!)
+    preco_final_ajustado = preco_base * (fator_climatico + fator_demanda)
+
+    return preco_final_ajustado
 
 # --- Exemplos de Uso ---
+# --- Exemplos de Uso Interativo ---
 if __name__ == "__main__":
-    print("--- Testando o Cálculo do Preço Final ---")
+    print("--- Calculadora de Preço Dinâmico ---")
 
-    preco_inicial = 100.00 # Exemplo de preço base
+    # Obter Quilômetros
+    while True: # Loop para garantir entrada válida
+        try:
+            quilometros_str = input("Digite a distância em quilômetros (ex: 10.5): ")
+            quilometros_input = float(quilometros_str)
+            if quilometros_input < 0:
+                print("Distância não pode ser negativa. Tente novamente.")
+            else:
+                break # Sai do loop se a entrada for válida
+        except ValueError:
+            print("Entrada inválida. Por favor, digite um número para os quilômetros.")
 
-    # Exemplo 1: Tempo bom
-    clima1 = "tempo bom"
-    preco_com_ajuste1 = calcular_preco_final(preco_inicial, clima1)
-    print(f"Preço base: R${preco_inicial:.2f} | Condição: '{clima1}' | Preço Final: R${preco_com_ajuste1:.2f}")
+    # Obter Tempo em Minutos
+    while True:
+        try:
+            tempo_minutos_str = input("Digite o tempo em minutos (ex: 30): ")
+            tempo_minutos_input = float(tempo_minutos_str)
+            if tempo_minutos_input < 0:
+                print("Tempo não pode ser negativo. Tente novamente.")
+            else:
+                break
+        except ValueError:
+            print("Entrada inválida. Por favor, digite um número para o tempo.")
 
-    # Exemplo 2: Chuva leve
-    clima2 = "chuva leve"
-    preco_com_ajuste2 = calcular_preco_final(preco_inicial, clima2)
-    print(f"Preço base: R${preco_inicial:.2f} | Condição: '{clima2}' | Preço Final: R${preco_com_ajuste2:.2f}")
+    # Obter Condição Climática
+    condicao_climatica_input = input("Digite a condição climática (tempo bom, chuva leve, chuva moderada, tempestade): ").lower()
+    # Podemos adicionar validação aqui se necessário, mas por enquanto, a função obter_fator_climatico já trata desconhecidos
 
-    # Exemplo 3: Tempestade
-    clima3 = "tempestade"
-    preco_com_ajuste3 = calcular_preco_final(preco_inicial, clima3)
-    print(f"Preço base: R${preco_inicial:.2f} | Condição: '{clima3}' | Preço Final: R${preco_com_ajuste3:.2f}")
+    # Obter Chamadas por Minuto
+    while True:
+        try:
+            chamadas_por_minuto_str = input("Digite o número de chamadas por minuto (ex: 8): ")
+            chamadas_por_minuto_input = float(chamadas_por_minuto_str)
+            if chamadas_por_minuto_input < 0:
+                print("Chamadas por minuto não pode ser negativo. Tente novamente.")
+            else:
+                break
+        except ValueError:
+            print("Entrada inválida. Por favor, digite um número para as chamadas por minuto.")
 
-    # Exemplo 4: Condição desconhecida (deve usar FC=1.0)
-    clima4 = "vendaval"
-    preco_com_ajuste4 = calcular_preco_final(preco_inicial, clima4)
-    print(f"Preço base: R${preco_inicial:.2f} | Condição: '{clima4}' | Preço Final: R${preco_com_ajuste4:.2f}")
+    # Calcular e exibir o preço final
+    preco_final_calculado = calcular_preco_final(
+        quilometros=quilometros_input,
+        tempo_minutos=tempo_minutos_input,
+        condicao_climatica=condicao_climatica_input,
+        chamadas_por_minuto=chamadas_por_minuto_input
+    )
 
-    # Exemplo 5: Teste com preço base inválido
-    try:
-        calcular_preco_final(-50.00, "tempo bom")
-    except ValueError as e:
-        print(f"Erro ao calcular preço com valor inválido: {e}")
+    print("\n--- Resultado do Cálculo ---")
+    print(f"Distância: {quilometros_input:.2f} km")
+    print(f"Tempo: {tempo_minutos_input:.2f} minutos")
+    print(f"Condição Climática: {condicao_climatica_input}")
+    print(f"Chamadas por Minuto: {chamadas_por_minuto_input:.2f}")
+    print(f"Preço Final Ajustado: R${preco_final_calculado:.2f}")

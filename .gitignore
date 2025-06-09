@@ -1,0 +1,41 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+# Editor-based HTTP Client requests
+/httpRequests/
+# Datasource local storage ignored files
+/dataSources/
+/dataSources.local.xml
+# Byte-code files
+*.pyc
+__pycache__/
+
+# IDEs specific folders
+.idea/
+.vscode/  # Se você usa VS Code, isso ignora configurações locais
+*.code-workspace # Se você tem arquivos de workspace
+
+# Environments
+venv/
+env/
+.Python/ # Alguns ambientes criam essa pasta
+.venv/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Secret files (e.g., for API keys)
+*.env
+.env.local
+*.secret
+
+# Executables
+*.exe
+*.dll
+*.so
+
+# Distribution / build
+dist/
+build/
+*.egg-info/
